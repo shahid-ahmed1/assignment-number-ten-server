@@ -22,6 +22,15 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     const reviewCollection = client.db('reviewDB').collection('review')
+    app.get('/review',async(req,res)=>{
+      const result = await reviewCollection
+      .find({})
+      .sort({ rating: -1 })  
+      .limit(6)  
+      .toArray();
+       res.send(result)
+    })
+
     app.post('/review',async(req,res)=>{
     const newReview = req.body;
     console.log(newReview);
