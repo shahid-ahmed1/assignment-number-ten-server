@@ -21,10 +21,9 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
     const reviewCollection = client.db('reviewDB').collection('review')
 
-    
+    const watchlistCollection = client.db('reviewDB').collection('wachlist')
       
     app.get('/review',async(req,res)=>{
       const result = await reviewCollection
@@ -35,6 +34,13 @@ async function run() {
        res.send(result)
     })
     
+    app.get("/myWatchlist", async (req, res) => {
+     
+      const cursor = watchlistCollection.find();
+      const result= await cursor.toArray();
+      res.send(result)
+     
+    });
    
     app.get('/review/all',async(req,res)=>{
       const cursor = reviewCollection.find();
@@ -55,13 +61,21 @@ async function run() {
       res.send(review);
   });
 
- 
- 
-
     app.post('/review',async(req,res)=>{
     const newReview = req.body;
-    console.log(newReview);
     const result = await reviewCollection.insertOne(newReview)
+    res.send(result)
+    })
+    app.post('/wachlist',async(req,res)=>{
+      const newReview = req.body;
+      const { title, email } = newReview;  
+      const existingGame = await watchlistCollection.findOne({ title, email });
+  
+      if (existingGame) {
+        return res.status(400).json({ message: "Already in Watchlist" }); 
+      }
+    console.log(newReview);
+    const result = await watchlistCollection.insertOne(newReview)
     res.send(result)
     })
    
@@ -92,12 +106,10 @@ async function run() {
       res.send(result)
     })
     await client.connect();
-    // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+  
   }
 }
 run().catch(console.dir);
