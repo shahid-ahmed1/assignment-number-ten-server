@@ -74,7 +74,6 @@ async function run() {
       if (existingGame) {
         return res.status(400).json({ message: "Already in Watchlist" }); 
       }
-    console.log(newReview);
     const result = await watchlistCollection.insertOne(newReview)
     res.send(result)
     })
